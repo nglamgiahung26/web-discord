@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doki or Furry - Discord Server</title>
+    <title>Doki or Furry - Galaxy</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -16,18 +16,17 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #080810;
+            background-color: #03030b;
             font-family: 'Outfit', sans-serif;
         }
 
-        #dragon-canvas {
+        #galaxy-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: 1;
-            pointer-events: none;
         }
 
         .container {
@@ -39,20 +38,22 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            pointer-events: none; /* Để chuột có thể tương tác xuyên qua thẻ card với canvas sao bên dưới */
         }
 
         .card {
+            pointer-events: auto;
             position: relative;
-            background: rgba(20, 20, 32, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 2px solid rgba(255, 255, 255, 0.15);
+            background: rgba(15, 15, 30, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(137, 180, 250, 0.25);
             border-radius: 24px;
             padding: 40px 30px;
             width: 100%;
             max-width: 440px;
             text-align: center;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(137, 180, 250, 0.1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(137, 180, 250, 0.15);
             animation: floatCard 6s ease-in-out infinite;
         }
 
@@ -79,9 +80,9 @@
             width: 90px;
             height: 90px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #89b4fa, #f38ba8);
+            background: linear-gradient(135deg, #89b4fa, #cba6f7);
             padding: 3px;
-            box-shadow: 0 0 20px rgba(137, 180, 250, 0.5);
+            box-shadow: 0 0 25px rgba(203, 166, 247, 0.5);
         }
 
         .avatar-wrapper img {
@@ -99,7 +100,7 @@
         h1 {
             font-size: 32px;
             font-weight: 800;
-            background: linear-gradient(135deg, #ffffff 30%, #89b4fa 100%);
+            background: linear-gradient(135deg, #ffffff 30%, #cba6f7 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
@@ -107,7 +108,7 @@
         }
 
         p {
-            color: #a6adc8;
+            color: #bac2de;
             font-size: 15px;
             margin-bottom: 30px;
             font-weight: 400;
@@ -117,179 +118,18 @@
             display: inline-block;
             width: 100%;
             padding: 14px 24px;
-            background: linear-gradient(135deg, #89b4fa 0%, #b4befe 100%);
+            background: linear-gradient(135deg, #89b4fa 0%, #cba6f7 100%);
             color: #11111b;
             font-weight: 600;
             font-size: 16px;
             text-decoration: none;
             border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(137, 180, 250, 0.3);
+            box-shadow: 0 8px 25px rgba(203, 166, 247, 0.35);
             transition: all 0.3s ease;
             cursor: pointer;
-            z-index: 30;
-            position: relative;
         }
 
         .join-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(137, 180, 250, 0.5);
-            background: linear-gradient(135deg, #b4befe 0%, #89b4fa 100%);
-        }
-
-        #roar-alert {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(243, 139, 168, 0.2);
-            border: 1px solid #f38ba8;
-            color: #f38ba8;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 600;
-            backdrop-filter: blur(8px);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 20;
-            pointer-events: none;
-            box-shadow: 0 0 15px rgba(243, 139, 168, 0.3);
-        }
-
-        #roar-alert.show {
-            transform: translateX(-50%) translateY(0);
-        }
-    </style>
-</head>
-<body>
-
-    <canvas id="dragon-canvas"></canvas>
-    <div id="roar-alert">🐲 *Rồng trắng gầm vang trời đất!* 🔥</div>
-
-    <div class="container">
-        <div class="card">
-            <div class="avatar-wrapper">
-                <!-- Đảm bảo tên file ảnh này trùng với file cậu upload lên GitHub nhé -->
-                <img src="Screenshot 2026-10-03 060114.jpg" alt="Avatar">
-            </div>
-            <div class="content">
-                <h1>Doki or Furry</h1>
-                <p>group Gaming</p>
-                <a href="https://discord.gg/exAPya3pk8" target="_blank" rel="noopener noreferrer" class="join-btn">THAM GIA</a>
-            </div>
-        </div>
-    </div>
-
-    <script src="webshield.js"></script>
-
-    <script>
-        const canvas = document.getElementById('dragon-canvas');
-        const ctx = canvas.getContext('2d');
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        let mouse = { x: canvas.width / 2, y: canvas.height / 2, active: false };
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-            mouse.active = true;
-        });
-        window.addEventListener('mouseleave', () => { mouse.active = false; });
-
-        // Tạo mảng đốt rồng dài và mềm mại hơn
-        const totalSegments = 60;
-        let dragonPath = [];
-        for (let i = 0; i < totalSegments; i++) {
-            dragonPath.push({ x: canvas.width / 2, y: canvas.height / 2 });
-        }
-
-        let angle = 0;
-        function updateDragon() {
-            let targetX, targetY;
-            
-            if (mouse.active) {
-                targetX = mouse.x;
-                targetY = mouse.y;
-            } else {
-                angle += 0.015;
-                targetX = canvas.width / 2 + Math.sin(angle) * (canvas.width * 0.35);
-                targetY = canvas.height / 2 + Math.cos(angle * 1.3) * (canvas.height * 0.25);
-            }
-
-            let head = dragonPath[0];
-            head.x += (targetX - head.x) * 0.07;
-            head.y += (targetY - head.y) * 0.07;
-
-            for (let i = 1; i < totalSegments; i++) {
-                let prev = dragonPath[i - 1];
-                let curr = dragonPath[i];
-                let dx = prev.x - curr.x;
-                let dy = prev.y - curr.y;
-                let dist = Math.sqrt(dx * dx + dy * dy);
-                let spacing = 10;
-                if (dist > spacing) {
-                    let angleNode = Math.atan2(dy, dx);
-                    curr.x = prev.x - Math.cos(angleNode) * spacing;
-                    curr.y = prev.y - Math.sin(angleNode) * spacing;
-                }
-            }
-        }
-
-        function drawDragon() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Vẽ thân rồng có dạng vảy ngọc trai uyển chuyển uốn lượn
-            for (let i = totalSegments - 1; i >= 0; i--) {
-                let p = dragonPath[i];
-                // Đầu rồng to rõ, thân và đuôi thon nhỏ dần
-                let size = i === 0 ? 16 : Math.max(3, (1 - i / totalSegments) * 22);
-                
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
-                
-                let gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
-                if (i === 0) {
-                    // Đầu rồng sáng chói đặc biệt
-                    gradient.addColorStop(0, '#ffffff');
-                    gradient.addColorStop(0.7, '#89b4fa');
-                    gradient.addColorStop(1, 'rgba(137, 180, 250, 0)');
-                    ctx.shadowBlur = 25;
-                    ctx.shadowColor = '#ffffff';
-                } else {
-                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-                    gradient.addColorStop(0.5, 'rgba(137, 180, 250, 0.5)');
-                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                    ctx.shadowBlur = 12;
-                    ctx.shadowColor = '#89b4fa';
-                }
-                
-                ctx.fillStyle = gradient;
-                ctx.fill();
-            }
-        }
-
-        function animate() {
-            updateDragon();
-            drawDragon();
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        const roarAlert = document.getElementById('roar-alert');
-        function triggerRoar() {
-            roarAlert.classList.add('show');
-            setTimeout(() => {
-                roarAlert.classList.remove('show');
-            }, 3500);
-
-            let nextRoarTime = Math.random() * 13000 + 12000;
-            setTimeout(triggerRoar, nextRoarTime);
-        }
-        setTimeout(triggerRoar, 8000);
-    </script>
-</body>
-</html>
+            box-shadow: 0 12px 30px rgba(203, 166, 247, 0.6);
+            background: linear-
