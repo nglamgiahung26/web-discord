@@ -1,11 +1,9 @@
 /**
  * WebShield Advanced - Giao diện bảo vệ website hiện đại
- * Tự động chặn chuột phải, phím tắt debug và hiển thị modal cảnh báo đẹp mắt.
  */
 (function () {
     'use strict';
 
-    // Chế độ Admin (thêm ?gateway=adminview vào URL để tắt tạm thời khi test)
     const ADMIN_KEY = "adminview";
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('gateway') === ADMIN_KEY || localStorage.getItem('ws_admin') === 'true') {
@@ -15,13 +13,11 @@
         return;
     }
 
-    // 1. Chặn click chuột phải
     document.addEventListener('contextmenu', function (e) {
         e.preventDefault();
         showWarning("Hành động này đã bị vô hiệu hóa để bảo vệ nội dung trang web!");
     });
 
-    // 2. Chặn các phím tắt F12, Ctrl+Shift+I, Ctrl+U, v.v.
     document.addEventListener('keydown', function (e) {
         if (
             e.key === 'F12' ||
@@ -33,7 +29,6 @@
         }
     });
 
-    // 3. Tạo giao diện Modal Cảnh báo Đẹp Mắt
     function createWarningModal() {
         if (document.getElementById('webshield-modal')) return;
 
@@ -127,7 +122,6 @@
         }
     }
 
-    // 4. Phát hiện DevTools mở qua kích thước cửa sổ
     setInterval(function () {
         const widthThreshold = window.outerWidth - window.innerWidth > 160;
         const heightThreshold = window.outerHeight - window.innerHeight > 160;
