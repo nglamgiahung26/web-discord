@@ -134,6 +134,8 @@
             box-shadow: 0 8px 20px rgba(137, 180, 250, 0.3);
             transition: all 0.3s ease;
             cursor: pointer;
+            z-index: 30;
+            position: relative;
         }
 
         .join-btn:hover {
@@ -183,19 +185,19 @@
     <div class="container">
         <div class="card">
             <div class="avatar-wrapper">
-                <!-- Thay link ảnh hoặc tên file ảnh của bạn vào đây -->
+                <!-- Đảm bảo tên file ảnh trùng khớp với file của cậu -->
                 <img src="Screenshot 2026-10-03 060114.jpg" alt="Avatar">
             </div>
             <div class="content">
                 <h1>Doki or Furry</h1>
                 <p>group Gaming</p>
-                <!-- Thay dấu # bằng link mời Discord của bạn -->
-                <a href="https://discord.gg/LINK_DISCORD_CUA_BAN" target="_blank" class="join-btn">THAM GIA</a>
+                <!-- Link Discord chính thức đã được gán vào đây -->
+                <a href="https://discord.gg/exAPya3pk8" target="_blank" rel="noopener noreferrer" class="join-btn">THAM GIA</a>
             </div>
         </div>
     </div>
 
-    <!-- Script bảo vệ web (Gọi file webshield.js) -->
+    <!-- Script bảo vệ web -->
     <script src="webshield.js"></script>
 
     <!-- Script tạo hiệu ứng Rồng Trắng Phương Đông uốn lượn và gầm -->
@@ -210,7 +212,6 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Tọa độ và trạng thái chuột
         let mouse = { x: canvas.width / 2, y: canvas.height / 2, active: false };
         window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
@@ -219,7 +220,6 @@
         });
         window.addEventListener('mouseleave', () => { mouse.active = false; });
 
-        // Tạo cấu trúc Thân Rồng (Snake/Dragon Path Simulation)
         const totalSegments = 45;
         let dragonPath = [];
         for (let i = 0; i < totalSegments; i++) {
@@ -234,13 +234,11 @@
                 targetX = mouse.x;
                 targetY = mouse.y;
             } else {
-                // Tự động bay lượn hình số 8 / lượn sóng khi không di chuột
                 angle += 0.02;
                 targetX = canvas.width / 2 + Math.sin(angle) * (canvas.width * 0.3);
                 targetY = canvas.height / 2 + Math.cos(angle * 1.5) * (canvas.height * 0.25);
             }
 
-            // Kéo các đốt thân theo đầu rồng
             let head = dragonPath[0];
             head.x += (targetX - head.x) * 0.08;
             head.y += (targetY - head.y) * 0.08;
@@ -251,7 +249,7 @@
                 let dx = prev.x - curr.x;
                 let dy = prev.y - curr.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
-                let spacing = 12; // Khoảng cách giữa các đốt vảy
+                let spacing = 12;
                 if (dist > spacing) {
                     let angleNode = Math.atan2(dy, dx);
                     curr.x = prev.x - Math.cos(angleNode) * spacing;
@@ -263,18 +261,13 @@
         function drawDragon() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Vẽ hiệu ứng hạt sáng bụi sao lung linh phía sau
-            // (Được tích hợp sẵn để tạo không gian huyền ảo)
-
-            // Vẽ thân rồng trắng phương đông uốn lượn
             for (let i = totalSegments - 1; i >= 0; i--) {
                 let p = dragonPath[i];
-                let size = Math.max(2, (1 - i / totalSegments) * 24); // Đầu to đuôi nhỏ dần
+                let size = Math.max(2, (1 - i / totalSegments) * 24);
                 
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
                 
-                // Màu trắng ngọc trai phát sáng nhẹ
                 let gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
                 gradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
                 gradient.addColorStop(0.5, 'rgba(137, 180, 250, 0.6)');
@@ -294,7 +287,6 @@
         }
         animate();
 
-        // Tính năng: Lâu lâu rồng gầm một cái cực ngầu
         const roarAlert = document.getElementById('roar-alert');
         function triggerRoar() {
             roarAlert.classList.add('show');
@@ -302,11 +294,9 @@
                 roarAlert.classList.remove('show');
             }, 3500);
 
-            // Thời gian ngẫu nhiên từ 12 đến 25 giây gầm 1 lần
             let nextRoarTime = Math.random() * 13000 + 12000;
             setTimeout(triggerRoar, nextRoarTime);
         }
-        // Bắt đầu chu kỳ gầm sau 8 giây đầu tiên truy cập web
         setTimeout(triggerRoar, 8000);
     </script>
 </body>
