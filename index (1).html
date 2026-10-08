@@ -1,0 +1,3207 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <script src="webshield.js"></script> 
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Hắc Động</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+body{
+    font-family:"Arial Rounded MT Bold",Arial,sans-serif;
+    background:#05010b;
+}
+
+/* =========================================================
+   VŨ TRỤ
+========================================================= */
+
+#space{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+
+    background:
+        radial-gradient(
+            circle at 50% 50%,
+            #19072d 0%,
+            #090212 45%,
+            #030107 100%
+        );
+}
+
+/* =========================================================
+   SAO NỀN
+   GIỮ NGUYÊN
+========================================================= */
+
+#stars{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+}
+
+.star{
+    position:absolute;
+    border-radius:50%;
+    pointer-events:none;
+
+    animation:
+        starTwinkle
+        var(--twinkle)
+        ease-in-out
+        infinite
+        alternate;
+}
+
+@keyframes starTwinkle{
+    from{
+        opacity:.25;
+        transform:scale(.75);
+    }
+
+    to{
+        opacity:1;
+        transform:scale(1.15);
+    }
+}
+
+/* =========================================================
+   CHỮ 01 / KÝ TỰ KIỂU DOKIDOKI
+   CHỈ THÊM MỚI
+   NẰM SAU KHUNG CHÍNH
+========================================================= */
+
+#fallingTextCanvas{
+    position:absolute;
+    inset:0;
+
+    width:100%;
+    height:100%;
+
+    z-index:2;
+    pointer-events:none;
+}
+
+/* =========================================================
+   PARTICLE CANVAS / MA TRẬN
+========================================================= */
+
+#particleCanvas{
+    position:absolute;
+    inset:0;
+
+    width:100%;
+    height:100%;
+
+    z-index:3;
+    pointer-events:none;
+}
+
+/* =========================================================
+   SAO BĂNG
+   HƯỚNG:
+   TRÊN PHẢI
+        ↙
+      ↙
+    ↙
+  ↙
+   GIỮA CẠNH TRÁI
+========================================================= */
+
+#shootingStars{
+    position:absolute;
+    inset:0;
+
+    z-index:6;
+    pointer-events:none;
+}
+
+.shooting-star{
+    position:absolute;
+
+    /* 0.5× so với bản Hắc Động */
+    width:15px;
+    height:15px;
+
+    pointer-events:none;
+    z-index:20;
+
+    /*
+       Không xoay container.
+       Quỹ đạo do JS điều khiển.
+    */
+    transform:none;
+
+    filter:
+        drop-shadow(0 0 2.5px #fff)
+        drop-shadow(0 0 6px #a9deff)
+        drop-shadow(0 0 14px #5caeff);
+}
+
+/* =========================================================
+   ĐẦU SAO
+   0.5×
+========================================================= */
+
+.shooting-star .shooting-core{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:15px;
+    height:15px;
+
+    transform:
+        translate(-50%,-50%);
+
+    background:
+        radial-gradient(
+            circle at 48% 43%,
+            #ffffff 0%,
+            #ffffff 18%,
+            #eaf7ff 38%,
+            #b2ddff 64%,
+            #64b2ff 100%
+        );
+
+    clip-path:polygon(
+        50% 0%,
+        61% 34%,
+        98% 35%,
+        68% 57%,
+        79% 97%,
+        50% 73%,
+        21% 97%,
+        32% 57%,
+        2% 35%,
+        39% 34%
+    );
+}
+
+/* =========================================================
+   HÀO QUANG ĐẦU SAO
+   0.5×
+========================================================= */
+
+.shooting-star .shooting-glow{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:5.5px;
+    height:5.5px;
+
+    transform:
+        translate(-50%,-50%);
+
+    border-radius:50%;
+
+    background:#fff;
+
+    box-shadow:
+        0 0 3px #fff,
+        0 0 7px #fff,
+        0 0 12px #8ed0ff,
+        0 0 21px rgba(91,171,255,.9);
+}
+
+/* =========================================================
+   ĐUÔI SAO
+   0.5×
+========================================================= */
+
+.shooting-star .shooting-tail{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:125px;
+    height:3px;
+
+    /*
+       Từ đầu sao kéo ngược lên bên phải.
+    */
+    transform:
+        translateY(-50%)
+        rotate(-25deg);
+
+    transform-origin:
+        left center;
+
+    border-radius:999px;
+
+    background:
+        linear-gradient(
+            to right,
+            #ffe47c 0%,
+            #ffffff 16%,
+            rgba(222,244,255,.92) 34%,
+            rgba(146,212,255,.62) 58%,
+            rgba(78,163,255,.24) 82%,
+            rgba(55,139,255,0) 100%
+        );
+
+    box-shadow:
+        0 0 2px rgba(255,255,255,.9),
+        0 0 5px rgba(111,192,255,.65);
+}
+
+/* Tia đuôi mảnh */
+
+.shooting-star .shooting-tail::after{
+    content:"";
+
+    position:absolute;
+
+    left:9px;
+    top:50%;
+
+    width:87.5px;
+    height:1px;
+
+    transform:
+        translateY(-50%);
+
+    border-radius:999px;
+
+    background:
+        linear-gradient(
+            to right,
+            rgba(255,232,133,.8),
+            rgba(255,255,255,.8),
+            rgba(156,219,255,.45),
+            transparent
+        );
+
+    filter:blur(.3px);
+}
+
+/* =========================================================
+   4 KHUNG HOÀNG GIA
+========================================================= */
+
+.corner{
+    position:absolute;
+
+    width:190px;
+    height:190px;
+
+    z-index:8;
+    pointer-events:none;
+
+    opacity:.75;
+}
+
+.corner::before{
+    content:"";
+
+    position:absolute;
+
+    width:120px;
+    height:120px;
+
+    border-top:
+        2px solid #d7ad45;
+
+    border-left:
+        2px solid #d7ad45;
+
+    filter:
+        drop-shadow(0 0 5px #d6a83d);
+}
+
+.corner::after{
+    content:"";
+
+    position:absolute;
+
+    width:70px;
+    height:70px;
+
+    border-top:
+        1px solid rgba(255,221,120,.65);
+
+    border-left:
+        1px solid rgba(255,221,120,.65);
+}
+
+.corner span,
+.corner span::before,
+.corner span::after{
+    position:absolute;
+
+    content:"";
+    display:block;
+
+    border:
+        1px solid rgba(218,176,72,.65);
+
+    transform:rotate(45deg);
+}
+
+.corner span{
+    width:35px;
+    height:35px;
+}
+
+.corner span::before{
+    width:20px;
+    height:20px;
+
+    top:6px;
+    left:6px;
+}
+
+.corner span::after{
+    width:8px;
+    height:8px;
+
+    top:12px;
+    left:12px;
+
+    background:#d5a93e;
+
+    box-shadow:
+        0 0 12px #ffd76a;
+}
+
+.tl{
+    top:0;
+    left:0;
+}
+
+.tr{
+    top:0;
+    right:0;
+    transform:scaleX(-1);
+}
+
+.bl{
+    bottom:0;
+    left:0;
+    transform:scaleY(-1);
+}
+
+.br{
+    bottom:0;
+    right:0;
+    transform:scale(-1);
+}
+
+/* =========================================================
+   AVATAR
+========================================================= */
+
+.avatar-wrapper{
+    position:absolute;
+
+    left:50%;
+    top:calc(50% - 218px);
+
+    width:100px;
+    height:100px;
+
+    transform:translateX(-50%);
+
+    z-index:20;
+}
+
+.avatar-outer{
+    position:absolute;
+    inset:0;
+
+    padding:4px;
+
+    border-radius:50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff1a3,
+            #9d6b18,
+            #ffe58a,
+            #81520b,
+            #fff0a0
+        );
+
+    box-shadow:
+        0 0 12px #d9a93c,
+        0 0 30px rgba(221,170,55,.4);
+}
+
+.avatar-outer::before{
+    content:"";
+
+    position:absolute;
+
+    inset:-9px;
+
+    border-radius:50%;
+
+    border:
+        1px solid rgba(231,192,82,.65);
+
+    box-shadow:
+        0 0 8px rgba(255,215,100,.35),
+        inset 0 0 8px rgba(255,215,100,.2);
+}
+
+.avatar{
+    width:100%;
+    height:100%;
+
+    overflow:hidden;
+
+    border-radius:50%;
+
+    background:#08030f;
+}
+
+.avatar img{
+    display:block;
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+}
+
+/* =========================================================
+   KHUNG CHÍNH
+========================================================= */
+
+.panel{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    width:min(500px,65vw);
+    min-height:255px;
+
+    padding:
+        62px 35px 35px;
+
+    background:
+        radial-gradient(
+            circle at 50% 35%,
+            rgba(92,47,145,.42),
+            transparent 45%
+        ),
+        radial-gradient(
+            circle at 20% 80%,
+            rgba(52,19,87,.4),
+            transparent 42%
+        ),
+        rgba(7,2,13,.9);
+
+    border:
+        5px solid transparent;
+
+    background-clip:
+        padding-box;
+
+    box-shadow:
+        0 0 0 1px #f1ce67,
+        0 0 0 5px #7e5516,
+        0 0 0 7px #e6bd50,
+        0 0 30px rgba(225,175,52,.45),
+        0 0 70px rgba(111,48,189,.2);
+
+    pointer-events:auto;
+
+    overflow:visible;
+
+    z-index:10;
+}
+
+.panel::before{
+    content:"";
+
+    position:absolute;
+    inset:5px;
+
+    border:
+        1px solid rgba(255,222,117,.28);
+
+    pointer-events:none;
+}
+
+.panel::after{
+    content:"";
+
+    position:absolute;
+    inset:12px;
+
+    border:
+        1px solid rgba(226,186,75,.42);
+
+    pointer-events:none;
+}
+
+/* =========================================================
+   SAO TRONG KHUNG
+========================================================= */
+
+.panel-stars{
+    position:absolute;
+
+    inset:0;
+
+    pointer-events:none;
+
+    opacity:.7;
+
+    z-index:1;
+}
+
+.panel-stars i{
+    position:absolute;
+
+    width:2px;
+    height:2px;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    box-shadow:
+        0 0 5px #fff;
+}
+
+/* =========================================================
+   HOA VĂN TRONG KHUNG
+========================================================= */
+
+.ornament{
+    position:absolute;
+
+    width:38px;
+    height:38px;
+
+    z-index:7;
+}
+
+.ornament::before,
+.ornament::after{
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    border:
+        2px solid #d9ad43;
+}
+
+.ornament::before{
+    transform:
+        rotate(45deg)
+        scale(.7);
+}
+
+.ornament::after{
+    border-radius:50%;
+
+    transform:scale(.25);
+
+    background:#f5d46e;
+
+    box-shadow:
+        0 0 10px #ffd967;
+}
+
+.o1{
+    top:16px;
+    left:16px;
+}
+
+.o2{
+    top:16px;
+    right:16px;
+
+    transform:rotate(90deg);
+}
+
+.o3{
+    bottom:16px;
+    left:16px;
+
+    transform:rotate(-90deg);
+}
+
+.o4{
+    bottom:16px;
+    right:16px;
+
+    transform:rotate(180deg);
+}
+
+/* =========================================================
+   NỘI DUNG
+========================================================= */
+
+.content{
+    position:relative;
+
+    z-index:10;
+
+    text-align:center;
+}
+
+/* =========================================================
+   HẮC ĐỘNG
+========================================================= */
+
+.title{
+    color:#f4d16d;
+
+    font-family:
+        "Cooper Black",
+        "Arial Rounded MT Bold",
+        Arial,
+        sans-serif;
+
+    font-size:
+        clamp(44px,6vw,64px);
+
+    font-weight:normal;
+
+    line-height:1;
+
+    letter-spacing:0;
+
+    word-spacing:0;
+
+    white-space:nowrap;
+
+    text-align:center;
+
+    text-rendering:
+        optimizeLegibility;
+
+    margin-bottom:12px;
+
+    text-shadow:
+        0 0 8px #e0b64c,
+        0 0 20px rgba(206,157,49,.65);
+}
+
+/* =========================================================
+   CÁC CHỮ KHÁC
+========================================================= */
+
+.subtitle{
+    color:#fff;
+
+    font-family:
+        "Arial Rounded MT Bold",
+        Arial,
+        sans-serif;
+
+    font-size:
+        clamp(14px,2vw,18px);
+
+    font-weight:bold;
+
+    margin-bottom:25px;
+
+    text-shadow:
+        0 0 8px rgba(255,255,255,.4);
+}
+
+.join-button{
+    display:inline-flex;
+
+    align-items:center;
+    justify-content:center;
+
+    min-width:240px;
+    min-height:52px;
+
+    padding:
+        13px 24px;
+
+    color:#fff3b0;
+
+    text-decoration:none;
+
+    font-family:
+        "Arial Rounded MT Bold",
+        Arial,
+        sans-serif;
+
+    font-size:15px;
+
+    font-weight:bold;
+
+    border:
+        1px solid #e4bd58;
+
+    border-radius:12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,218,107,.16),
+            rgba(83,39,128,.18)
+        );
+
+    box-shadow:
+        inset 0 0 15px rgba(255,211,96,.08),
+        0 0 15px rgba(225,178,59,.22);
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        background .18s ease;
+
+    position:relative;
+
+    overflow:visible;
+
+    cursor:pointer;
+}
+
+.join-button:hover{
+    transform:
+        translateY(-2px)
+        scale(1.025);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,218,107,.25),
+            rgba(83,39,128,.28)
+        );
+
+    box-shadow:
+        inset 0 0 18px rgba(255,211,96,.12),
+        0 0 25px rgba(225,178,59,.4);
+}
+
+/* =========================================================
+   CREDIT
+========================================================= */
+
+.credit{
+    position:fixed;
+
+    right:18px;
+    bottom:14px;
+
+    z-index:30;
+
+    color:
+        rgba(255,224,130,.75);
+
+    font-family:
+        "Arial Rounded MT Bold",
+        Arial,
+        sans-serif;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    text-shadow:
+        0 0 7px rgba(255,210,80,.35);
+}
+
+/* =========================================================
+   HIỆU ỨNG NỨT KÍNH
+========================================================= */
+
+.glass-crack{
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:10px;
+    height:10px;
+
+    pointer-events:none;
+
+    z-index:200;
+}
+
+.crack-line{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:0;
+    height:2px;
+
+    transform-origin:left center;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.98),
+            rgba(207,235,255,.92),
+            rgba(255,255,255,.38),
+            transparent
+        );
+
+    box-shadow:
+        0 0 3px rgba(255,255,255,.95),
+        0 0 9px rgba(170,215,255,.65);
+
+    animation:
+        crackSpread
+        .52s
+        cubic-bezier(.15,.75,.3,1)
+        forwards;
+}
+
+.crack-line::after{
+    content:"";
+
+    position:absolute;
+
+    right:0;
+    top:-1px;
+
+    width:5px;
+    height:5px;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    box-shadow:
+        0 0 6px #fff,
+        0 0 11px #9ddcff;
+}
+
+.crack-branch{
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:0;
+    height:1.5px;
+
+    transform-origin:left center;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.94),
+            rgba(211,239,255,.7),
+            transparent
+        );
+
+    box-shadow:
+        0 0 5px rgba(255,255,255,.75);
+
+    animation:
+        crackBranch
+        .6s
+        ease-out
+        forwards;
+}
+
+@keyframes crackSpread{
+
+    0%{
+        width:0;
+        opacity:0;
+    }
+
+    12%{
+        opacity:1;
+    }
+
+    100%{
+        width:155px;
+        opacity:.96;
+    }
+}
+
+@keyframes crackBranch{
+
+    0%{
+        width:0;
+        opacity:0;
+    }
+
+    20%{
+        opacity:1;
+    }
+
+    100%{
+        width:62px;
+        opacity:.72;
+    }
+}
+
+.glass-piece{
+    position:absolute;
+
+    width:5px;
+    height:9px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.98),
+            rgba(180,220,255,.62)
+        );
+
+    border:
+        1px solid rgba(255,255,255,.6);
+
+    box-shadow:
+        0 0 8px rgba(195,230,255,.95);
+
+    pointer-events:none;
+
+    z-index:210;
+
+    animation:
+        glassFly
+        .85s
+        cubic-bezier(.15,.65,.25,1)
+        forwards;
+}
+
+@keyframes glassFly{
+
+    0%{
+        opacity:1;
+
+        transform:
+            translate(0,0)
+            rotate(0deg)
+            scale(1);
+    }
+
+    35%{
+        opacity:1;
+    }
+
+    100%{
+        opacity:0;
+
+        transform:
+            translate(var(--dx),var(--dy))
+            rotate(320deg)
+            scale(.3);
+    }
+}
+
+/* =========================================================
+   RUNG MÀN HÌNH
+========================================================= */
+
+#space.screen-shake{
+    animation:
+        screenShake
+        .42s
+        cubic-bezier(.36,.07,.19,.97);
+}
+
+@keyframes screenShake{
+
+    0%{
+        transform:
+            translate3d(0,0,0);
+    }
+
+    10%{
+        transform:
+            translate3d(-5px,3px,0);
+    }
+
+    20%{
+        transform:
+            translate3d(6px,-4px,0);
+    }
+
+    30%{
+        transform:
+            translate3d(-6px,-5px,0);
+    }
+
+    40%{
+        transform:
+            translate3d(5px,4px,0);
+    }
+
+    50%{
+        transform:
+            translate3d(-5px,2px,0);
+    }
+
+    60%{
+        transform:
+            translate3d(4px,-3px,0);
+    }
+
+    70%{
+        transform:
+            translate3d(-3px,2px,0);
+    }
+
+    80%{
+        transform:
+            translate3d(2px,-1px,0);
+    }
+
+    90%{
+        transform:
+            translate3d(-1px,1px,0);
+    }
+
+    100%{
+        transform:
+            translate3d(0,0,0);
+    }
+}
+
+/* =========================================================
+   VÒNG MA THUẬT
+========================================================= */
+
+#magicCircle{
+    position:fixed;
+
+    width:52px;
+    height:52px;
+
+    left:0;
+    top:0;
+
+    z-index:2147483647;
+
+    pointer-events:none;
+
+    opacity:0;
+
+    transform:
+        translate(-50%,-50%);
+
+    will-change:
+        transform,
+        opacity;
+}
+
+.magic-ring{
+    position:absolute;
+
+    inset:0;
+
+    border-radius:50%;
+
+    border:
+        1px solid rgba(220,180,255,.75);
+
+    box-shadow:
+        0 0 7px rgba(166,103,255,.65),
+        inset 0 0 7px rgba(166,103,255,.35);
+}
+
+.magic-ring::before{
+    content:"";
+
+    position:absolute;
+
+    inset:5px;
+
+    border-radius:50%;
+
+    border:
+        1px dashed rgba(220,180,255,.75);
+
+    animation:
+        magicRotate
+        7s
+        linear
+        infinite;
+}
+
+.magic-ring::after{
+    content:"";
+
+    position:absolute;
+
+    inset:11px;
+
+    border-radius:50%;
+
+    border:
+        1px solid rgba(120,191,255,.55);
+
+    animation:
+        magicRotateReverse
+        5s
+        linear
+        infinite;
+}
+
+.magic-symbols{
+    position:absolute;
+
+    inset:0;
+
+    animation:
+        magicRotate
+        10s
+        linear
+        infinite;
+}
+
+.magic-symbols span{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    color:#d8b4ff;
+
+    font-family:Arial,sans-serif;
+
+    font-size:7px;
+
+    text-shadow:
+        0 0 6px #9c5cff;
+
+    transform-origin:
+        0 0;
+}
+
+.magic-symbols span:nth-child(1){
+    transform:
+        translate(-50%,-50%)
+        translateY(-19px);
+}
+
+.magic-symbols span:nth-child(2){
+    transform:
+        translate(-50%,-50%)
+        rotate(90deg)
+        translateY(-19px);
+}
+
+.magic-symbols span:nth-child(3){
+    transform:
+        translate(-50%,-50%)
+        rotate(180deg)
+        translateY(-19px);
+}
+
+.magic-symbols span:nth-child(4){
+    transform:
+        translate(-50%,-50%)
+        rotate(270deg)
+        translateY(-19px);
+}
+
+.magic-core{
+    position:absolute;
+
+    width:7px;
+    height:7px;
+
+    left:50%;
+    top:50%;
+
+    transform:
+        translate(-50%,-50%);
+
+    border-radius:50%;
+
+    background:#fff;
+
+    box-shadow:
+        0 0 5px #fff,
+        0 0 12px #9d5cff,
+        0 0 20px #5ca9ff;
+}
+
+@keyframes magicRotate{
+
+    from{
+        transform:rotate(0deg);
+    }
+
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@keyframes magicRotateReverse{
+
+    from{
+        transform:rotate(360deg);
+    }
+
+    to{
+        transform:rotate(0deg);
+    }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:700px){
+
+    .corner{
+        width:120px;
+        height:120px;
+
+        opacity:.65;
+    }
+
+    .corner::before{
+        width:78px;
+        height:78px;
+    }
+
+    .corner::after{
+        width:48px;
+        height:48px;
+    }
+
+    .corner span{
+        width:26px;
+        height:26px;
+    }
+
+    .corner span::before{
+        width:15px;
+        height:15px;
+
+        top:5px;
+        left:5px;
+    }
+
+    .corner span::after{
+        width:6px;
+        height:6px;
+
+        top:9px;
+        left:9px;
+    }
+
+    .avatar-wrapper{
+        top:calc(50% - 184px);
+
+        width:78px;
+        height:78px;
+    }
+
+    .panel{
+        width:min(88vw,500px);
+
+        min-height:230px;
+
+        padding:
+            50px 20px 28px;
+    }
+
+    .title{
+        font-size:
+            clamp(34px,10vw,48px);
+    }
+
+    .subtitle{
+        font-size:13px;
+
+        margin-bottom:21px;
+    }
+
+    .join-button{
+        min-width:205px;
+        min-height:47px;
+
+        padding:
+            11px 17px;
+
+        font-size:13px;
+    }
+
+    .credit{
+        right:10px;
+        bottom:9px;
+
+        font-size:10px;
+    }
+
+    #magicCircle{
+        width:44px;
+        height:44px;
+    }
+
+    /* SAO BĂNG 0.5× */
+
+    .shooting-star{
+        width:12px;
+        height:12px;
+    }
+
+    .shooting-star .shooting-core{
+        width:12px;
+        height:12px;
+    }
+
+    .shooting-star .shooting-glow{
+        width:4px;
+        height:4px;
+    }
+
+    .shooting-star .shooting-tail{
+        width:85px;
+        height:2px;
+    }
+
+    .shooting-star .shooting-tail::after{
+        width:72px;
+    }
+}
+
+@media(max-width:420px){
+
+    .panel{
+        width:92vw;
+    }
+
+    .title{
+        font-size:34px;
+    }
+
+    .subtitle{
+        font-size:12px;
+    }
+
+    .join-button{
+        min-width:190px;
+        font-size:12px;
+    }
+
+    /* SAO BĂNG 0.5× */
+
+    .shooting-star{
+        width:11px;
+        height:11px;
+    }
+
+    .shooting-star .shooting-core{
+        width:11px;
+        height:11px;
+    }
+
+    .shooting-star .shooting-tail{
+        width:72.5px;
+    }
+
+    .shooting-star .shooting-tail::after{
+        width:58px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="space">
+
+    <!-- SAO NỀN -->
+    <div id="stars"></div>
+
+    <!-- =====================================================
+         CHỮ 01 / DOKIDOKI
+         NẰM SAU KHUNG CHÍNH
+    ====================================================== -->
+    <canvas id="fallingTextCanvas"></canvas>
+
+    <!-- PARTICLE / MA TRẬN -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- SAO BĂNG -->
+    <div id="shootingStars"></div>
+
+    <!-- 4 KHUNG HOÀNG GIA -->
+    <div class="corner tl">
+        <span></span>
+    </div>
+
+    <div class="corner tr">
+        <span></span>
+    </div>
+
+    <div class="corner bl">
+        <span></span>
+    </div>
+
+    <div class="corner br">
+        <span></span>
+    </div>
+
+    <!-- AVATAR -->
+    <div class="avatar-wrapper">
+
+        <div class="avatar-outer">
+
+            <div class="avatar">
+
+                <img
+                    src="https://theselfishmeme.co.uk/wp-content/uploads/2026/06/1-34.webp"
+                    alt="Avatar"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- KHUNG CHÍNH -->
+    <div class="panel">
+
+        <div
+            class="panel-stars"
+            id="panelStars"
+        ></div>
+
+        <div class="ornament o1"></div>
+        <div class="ornament o2"></div>
+        <div class="ornament o3"></div>
+        <div class="ornament o4"></div>
+
+        <div class="content">
+
+            <div class="title">
+                Hắc Động
+            </div>
+
+            <div class="subtitle">
+                group share game and manga
+            </div>
+
+            <a
+                id="joinButton"
+                class="join-button"
+                href="https://discord.gg/JfZn2hfQ"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                THAM GIA CÙNG CHÚNG TÔI
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="credit">
+        by-longdz
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     MAGIC CIRCLE
+===================================================== -->
+
+<div id="magicCircle">
+
+    <div class="magic-ring"></div>
+
+    <div class="magic-symbols">
+        <span>✦</span>
+        <span>◇</span>
+        <span>✧</span>
+        <span>◇</span>
+    </div>
+
+    <div class="magic-core"></div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   SAO NỀN
+   GIỮ NGUYÊN
+========================================================= */
+
+const stars =
+    document.getElementById("stars");
+
+const mobile =
+    window.matchMedia(
+        "(max-width:700px)"
+    ).matches;
+
+const starCount =
+    mobile ? 120 : 210;
+
+const starColors = [
+    "#ffffff",
+    "#bba7ff",
+    "#8ecbff",
+    "#ffe98a",
+    "#ff9edb",
+    "#9fffe0"
+];
+
+for(let i=0;i<starCount;i++){
+
+    const star =
+        document.createElement("div");
+
+    star.className =
+        "star";
+
+    const size =
+        Math.random() < .82
+        ? Math.random()*2 + .6
+        : Math.random()*3 + 1;
+
+    star.style.width =
+        size + "px";
+
+    star.style.height =
+        size + "px";
+
+    star.style.left =
+        Math.random()*100 + "%";
+
+    star.style.top =
+        Math.random()*100 + "%";
+
+    star.style.background =
+        starColors[
+            Math.floor(
+                Math.random()*
+                starColors.length
+            )
+        ];
+
+    star.style.boxShadow =
+        `0 0 ${size*3}px ${star.style.background}`;
+
+    star.style.setProperty(
+        "--twinkle",
+        (Math.random()*3+2) + "s"
+    );
+
+    star.style.animationDelay =
+        Math.random()*4 + "s";
+
+    stars.appendChild(star);
+}
+
+
+/* =========================================================
+   CHỮ 01 / KÝ TỰ KIỂU DOKIDOKI
+   CHỈ THÊM MỚI
+========================================================= */
+
+const fallingCanvas =
+    document.getElementById(
+        "fallingTextCanvas"
+    );
+
+const fallingCtx =
+    fallingCanvas.getContext("2d");
+
+let fallingW = 0;
+let fallingH = 0;
+
+let fallingColumns = [];
+
+const fallingChars =
+    "01ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+function resizeFallingText(){
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+    fallingW =
+        window.innerWidth;
+
+    fallingH =
+        window.innerHeight;
+
+    fallingCanvas.width =
+        fallingW*dpr;
+
+    fallingCanvas.height =
+        fallingH*dpr;
+
+    fallingCanvas.style.width =
+        fallingW+"px";
+
+    fallingCanvas.style.height =
+        fallingH+"px";
+
+    fallingCtx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+    const fontSize =
+        mobile ? 13 : 16;
+
+    const columnGap =
+        mobile ? 32 : 38;
+
+    const count =
+        Math.ceil(
+            fallingW/columnGap
+        );
+
+    fallingColumns = [];
+
+    for(let i=0;i<count;i++){
+
+        fallingColumns.push({
+
+            x:i*columnGap,
+
+            y:
+                Math.random()*
+                fallingH*
+                -1.5,
+
+            speed:
+                (mobile
+                    ? .65
+                    : .8
+                )+
+                Math.random()*
+                1.25,
+
+            length:
+                Math.floor(
+                    Math.random()*9
+                )+5,
+
+            fontSize:
+
+                fontSize+
+                Math.random()*3,
+
+            delay:
+                Math.random()*3000
+
+        });
+    }
+}
+
+resizeFallingText();
+
+window.addEventListener(
+    "resize",
+    resizeFallingText
+);
+
+
+let fallingLastTime =
+    performance.now();
+
+function animateFallingText(time){
+
+    requestAnimationFrame(
+        animateFallingText
+    );
+
+    const delta =
+        Math.min(
+            time-fallingLastTime,
+            40
+        );
+
+    fallingLastTime =
+        time;
+
+    fallingCtx.clearRect(
+        0,
+        0,
+        fallingW,
+        fallingH
+    );
+
+    fallingCtx.textAlign =
+        "center";
+
+    fallingCtx.textBaseline =
+        "top";
+
+    for(
+        const column
+        of fallingColumns
+    ){
+
+        if(column.delay>0){
+
+            column.delay -= delta;
+
+            continue;
+        }
+
+        column.y +=
+            column.speed*
+            delta;
+
+        for(
+            let j=0;
+            j<column.length;
+            j++
+        ){
+
+            const char =
+                fallingChars[
+                    Math.floor(
+                        Math.random()*
+                        fallingChars.length
+                    )
+                ];
+
+            const y =
+                column.y+
+                j*
+                column.fontSize;
+
+            if(
+                y<
+                -column.fontSize ||
+                y>
+                fallingH+
+                column.fontSize
+            ){
+                continue;
+            }
+
+            /*
+               MÀU ĐEN
+               Nằm phía sau panel
+            */
+
+            const alpha =
+                Math.max(
+                    .08,
+                    .42-
+                    j*.025
+                );
+
+            fallingCtx.globalAlpha =
+                alpha;
+
+            fallingCtx.fillStyle =
+                "#000000";
+
+            fallingCtx.font =
+                `bold ${column.fontSize}px Arial`;
+
+            fallingCtx.fillText(
+                char,
+                column.x,
+                y
+            );
+        }
+
+        if(
+            column.y>
+            fallingH+
+            column.length*
+            column.fontSize
+        ){
+
+            column.y =
+                -(
+                    Math.random()*
+                    fallingH
+                );
+
+            column.speed =
+                (mobile
+                    ? .65
+                    : .8
+                )+
+                Math.random()*
+                1.25;
+
+            column.length =
+                Math.floor(
+                    Math.random()*9
+                )+5;
+        }
+    }
+
+    fallingCtx.globalAlpha =
+        1;
+}
+
+requestAnimationFrame(
+    animateFallingText
+);
+
+
+/* =========================================================
+   CANVAS
+========================================================= */
+
+const canvas =
+    document.getElementById(
+        "particleCanvas"
+    );
+
+const ctx =
+    canvas.getContext("2d");
+
+let W = 0;
+let H = 0;
+
+
+function resizeCanvas(){
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+    W =
+        window.innerWidth;
+
+    H =
+        window.innerHeight;
+
+    canvas.width =
+        W*dpr;
+
+    canvas.height =
+        H*dpr;
+
+    canvas.style.width =
+        W+"px";
+
+    canvas.style.height =
+        H+"px";
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+}
+
+resizeCanvas();
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+/* =========================================================
+   CHUỘT
+========================================================= */
+
+const mouse = {
+
+    x:innerWidth/2,
+    y:innerHeight/2,
+
+    active:false
+};
+
+window.addEventListener(
+    "mousemove",
+    e=>{
+
+        mouse.x =
+            e.clientX;
+
+        mouse.y =
+            e.clientY;
+
+        mouse.active =
+            true;
+    },
+    {passive:true}
+);
+
+window.addEventListener(
+    "mouseleave",
+    ()=>{
+
+        mouse.active =
+            false;
+    }
+);
+
+window.addEventListener(
+    "touchmove",
+    e=>{
+
+        if(!e.touches[0])
+            return;
+
+        mouse.x =
+            e.touches[0].clientX;
+
+        mouse.y =
+            e.touches[0].clientY;
+
+        mouse.active =
+            true;
+    },
+    {passive:true}
+);
+
+window.addEventListener(
+    "touchend",
+    ()=>{
+
+        mouse.active =
+            false;
+    },
+    {passive:true}
+);
+
+
+/* =========================================================
+   HẠT GẦN CHUỘT
+   TỐC ĐỘ ẢNH HƯỞNG ×1.5
+========================================================= */
+
+const nearParticles = [];
+const farParticles = [];
+const distantParticles = [];
+
+
+class NearParticle{
+
+    constructor(){
+        this.reset();
+    }
+
+    reset(){
+
+        this.x =
+            Math.random()*W;
+
+        this.y =
+            Math.random()*H;
+
+        this.vx =
+            (Math.random()-.5)*.25;
+
+        this.vy =
+            (Math.random()-.5)*.25;
+
+        this.size =
+            Math.random()*1.7+.5;
+
+        this.alpha =
+            Math.random()*.7+.2;
+
+        this.color =
+            starColors[
+                Math.floor(
+                    Math.random()*
+                    starColors.length
+                )
+            ];
+    }
+
+    update(){
+
+        if(mouse.active){
+
+            const dx =
+                mouse.x-this.x;
+
+            const dy =
+                mouse.y-this.y;
+
+            const dist =
+                Math.sqrt(
+                    dx*dx+
+                    dy*dy
+                );
+
+            if(
+                dist>0 &&
+                dist<300
+            ){
+
+                const force =
+                    (1-dist/300)*
+                    .018*
+                    1.5;
+
+                this.vx +=
+                    dx/dist*
+                    force;
+
+                this.vy +=
+                    dy/dist*
+                    force;
+
+                const swirl =
+                    .0025*
+                    1.5;
+
+                this.vx +=
+                    -dy/dist*
+                    swirl;
+
+                this.vy +=
+                    dx/dist*
+                    swirl;
+            }
+        }
+
+        this.vx *= .994;
+        this.vy *= .994;
+
+        this.x +=
+            this.vx;
+
+        this.y +=
+            this.vy;
+
+        if(
+            this.x<-30 ||
+            this.x>W+30 ||
+            this.y<-30 ||
+            this.y>H+30
+        ){
+
+            this.reset();
+        }
+    }
+
+    draw(){
+
+        ctx.globalAlpha =
+            this.alpha;
+
+        ctx.fillStyle =
+            this.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            this.x,
+            this.y,
+            this.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+}
+
+
+class FarParticle{
+
+    constructor(){
+
+        this.angle =
+            Math.random()*
+            Math.PI*2;
+
+        this.radius =
+            Math.random()*360+
+            170;
+
+        this.speed =
+            Math.random()*.0008+
+            .00025;
+
+        this.size =
+            Math.random()*1.5+
+            .4;
+
+        this.alpha =
+            Math.random()*.5+
+            .12;
+
+        this.color =
+            starColors[
+                Math.floor(
+                    Math.random()*
+                    starColors.length
+                )
+            ];
+    }
+
+    update(){
+
+        this.angle +=
+            this.speed;
+
+        if(mouse.active){
+
+            this.angle +=
+                this.speed*
+                .45*
+                1.5;
+        }
+    }
+
+    draw(){
+
+        let cx =
+            W/2;
+
+        let cy =
+            H/2;
+
+        if(mouse.active){
+
+            cx +=
+                (mouse.x-W/2)*
+                .06;
+
+            cy +=
+                (mouse.y-H/2)*
+                .06;
+        }
+
+        const x =
+            cx+
+            Math.cos(this.angle)*
+            this.radius;
+
+        const y =
+            cy+
+            Math.sin(this.angle)*
+            this.radius*
+            .58;
+
+        ctx.globalAlpha =
+            this.alpha;
+
+        ctx.fillStyle =
+            this.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            this.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+}
+
+
+class DistantParticle{
+
+    constructor(){
+
+        this.angle =
+            Math.random()*
+            Math.PI*2;
+
+        this.radius =
+            Math.random()*650+
+            420;
+
+        this.speed =
+            Math.random()*.00035+
+            .0001;
+
+        this.size =
+            Math.random()*1.2+
+            .3;
+
+        this.alpha =
+            Math.random()*.32+
+            .05;
+
+        this.color =
+            starColors[
+                Math.floor(
+                    Math.random()*
+                    starColors.length
+                )
+            ];
+    }
+
+    update(){
+
+        this.angle +=
+            this.speed;
+
+        if(mouse.active){
+
+            this.angle +=
+                this.speed*
+                .25*
+                1.5;
+        }
+    }
+
+    draw(){
+
+        let cx =
+            W/2;
+
+        let cy =
+            H/2;
+
+        if(mouse.active){
+
+            cx +=
+                (mouse.x-W/2)*
+                .025;
+
+            cy +=
+                (mouse.y-H/2)*
+                .025;
+        }
+
+        const x =
+            cx+
+            Math.cos(this.angle)*
+            this.radius;
+
+        const y =
+            cy+
+            Math.sin(this.angle)*
+            this.radius*
+            .6;
+
+        ctx.globalAlpha =
+            this.alpha;
+
+        ctx.fillStyle =
+            this.color;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            x,
+            y,
+            this.size,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+    }
+}
+
+
+const nearCount =
+    mobile ? 35 : 80;
+
+const farCount =
+    mobile ? 55 : 110;
+
+const distantCount =
+    mobile ? 35 : 70;
+
+
+for(let i=0;i<nearCount;i++){
+
+    nearParticles.push(
+        new NearParticle()
+    );
+}
+
+for(let i=0;i<farCount;i++){
+
+    farParticles.push(
+        new FarParticle()
+    );
+}
+
+for(let i=0;i<distantCount;i++){
+
+    distantParticles.push(
+        new DistantParticle()
+    );
+}
+
+
+/* =========================================================
+   GLOW THEO CHUỘT
+========================================================= */
+
+function drawMouseGlow(){
+
+    if(!mouse.active)
+        return;
+
+    const gradient =
+        ctx.createRadialGradient(
+            mouse.x,
+            mouse.y,
+            0,
+            mouse.x,
+            mouse.y,
+            130
+        );
+
+    gradient.addColorStop(
+        0,
+        "rgba(150,90,255,.10)"
+    );
+
+    gradient.addColorStop(
+        .45,
+        "rgba(100,120,255,.045)"
+    );
+
+    gradient.addColorStop(
+        1,
+        "rgba(0,0,0,0)"
+    );
+
+    ctx.fillStyle =
+        gradient;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        mouse.x,
+        mouse.y,
+        130,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+}
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+let lastFrame =
+    0;
+
+const fps =
+    mobile ? 45 : 60;
+
+const frameDelay =
+    1000/fps;
+
+
+function animate(time){
+
+    requestAnimationFrame(
+        animate
+    );
+
+    if(
+        time-lastFrame<
+        frameDelay
+    ){
+        return;
+    }
+
+    lastFrame =
+        time;
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    drawMouseGlow();
+
+
+    for(
+        const p of
+        distantParticles
+    ){
+
+        p.update();
+        p.draw();
+    }
+
+
+    for(
+        const p of
+        farParticles
+    ){
+
+        p.update();
+        p.draw();
+    }
+
+
+    for(
+        const p of
+        nearParticles
+    ){
+
+        p.update();
+        p.draw();
+    }
+
+    ctx.globalAlpha =
+        1;
+}
+
+requestAnimationFrame(
+    animate
+);
+
+
+/* =========================================================
+   SAO BĂNG
+   KÍCH THƯỚC ×0.5
+   TỐC ĐỘ ×1.5 SO VỚI BẢN HIỆN TẠI
+
+   START:
+   GÓC TRÊN BÊN PHẢI
+
+   END:
+   TRUNG ĐIỂM CẠNH TRÁI
+========================================================= */
+
+const shootingStars =
+    document.getElementById(
+        "shootingStars"
+    );
+
+
+function createShootingStar(){
+
+    const star =
+        document.createElement(
+            "div"
+        );
+
+    star.className =
+        "shooting-star";
+
+
+    const tail =
+        document.createElement(
+            "div"
+        );
+
+    tail.className =
+        "shooting-tail";
+
+
+    const glow =
+        document.createElement(
+            "div"
+        );
+
+    glow.className =
+        "shooting-glow";
+
+
+    const core =
+        document.createElement(
+            "div"
+        );
+
+    core.className =
+        "shooting-core";
+
+
+    star.appendChild(
+        tail
+    );
+
+    star.appendChild(
+        glow
+    );
+
+    star.appendChild(
+        core
+    );
+
+    shootingStars.appendChild(
+        star
+    );
+
+
+    /* =====================================================
+       ĐIỂM BẮT ĐẦU:
+       TRÊN BÊN PHẢI
+    ===================================================== */
+
+    const startX =
+        W +
+        70 +
+        Math.random()*180;
+
+    const startY =
+        -80 +
+        Math.random()*80;
+
+
+    /* =====================================================
+       ĐIỂM KẾT THÚC:
+       TRUNG ĐIỂM CẠNH TRÁI
+    ===================================================== */
+
+    const endX =
+        -120 -
+        Math.random()*100;
+
+    const endY =
+        H*.50 +
+        (Math.random()-.5)*
+        H*.05;
+
+
+    /* =====================================================
+       TỐC ĐỘ ×1.5 SO VỚI BẢN HIỆN TẠI
+
+       BẢN CŨ:
+       oldDuration / 1.70
+
+       BẢN MỚI:
+       oldDuration / (1.70 × 1.5)
+       = oldDuration / 2.55
+    ===================================================== */
+
+    const oldDuration =
+        5.2+
+        Math.random()*2;
+
+    const duration =
+        oldDuration/
+        2.55;
+
+
+    const startTime =
+        performance.now();
+
+
+    function move(now){
+
+        if(
+            !document.body.contains(
+                star
+            )
+        ){
+            return;
+        }
+
+
+        const progress =
+            Math.min(
+                (
+                    now-
+                    startTime
+                )/
+                (duration*1000),
+                1
+            );
+
+
+        /*
+           Chuyển động gần tuyến tính
+           để đường bay nhìn rõ.
+        */
+
+        const eased =
+            1-
+            Math.pow(
+                1-progress,
+                1.05
+            );
+
+
+        /*
+           X giảm:
+           PHẢI → TRÁI
+
+           Y tăng:
+           TRÊN → GIỮA
+        */
+
+        const x =
+            startX+
+            (endX-startX)*
+            eased;
+
+        const y =
+            startY+
+            (endY-startY)*
+            eased;
+
+
+        /*
+           KHÔNG rotate container.
+           Điều này đảm bảo sao không bị bay lùi.
+        */
+
+        star.style.left =
+            x+"px";
+
+        star.style.top =
+            y+"px";
+
+
+        /*
+           Fade.
+        */
+
+        let opacity = 1;
+
+        if(progress<.08){
+
+            opacity =
+                progress/.08;
+
+        }else if(progress>.88){
+
+            opacity =
+                (1-progress)/.12;
+        }
+
+        star.style.opacity =
+            Math.max(
+                0,
+                opacity
+            );
+
+
+        if(progress<1){
+
+            requestAnimationFrame(
+                move
+            );
+
+        }else{
+
+            star.remove();
+        }
+    }
+
+
+    requestAnimationFrame(
+        move
+    );
+}
+
+
+/* =========================================================
+   TẠO SAO BĂNG
+========================================================= */
+
+function shootingLoop(){
+
+    createShootingStar();
+
+    setTimeout(
+        shootingLoop,
+        2600+
+        Math.random()*3000
+    );
+}
+
+shootingLoop();
+
+
+/* =========================================================
+   SAO TRONG KHUNG
+========================================================= */
+
+const panelStars =
+    document.getElementById(
+        "panelStars"
+    );
+
+for(let i=0;i<32;i++){
+
+    const s =
+        document.createElement(
+            "i"
+        );
+
+    s.style.left =
+        Math.random()*100+
+        "%";
+
+    s.style.top =
+        Math.random()*100+
+        "%";
+
+    s.style.opacity =
+        .15+
+        Math.random()*.5;
+
+    s.style.transform =
+        `scale(${
+            .5+
+            Math.random()
+        })`;
+
+    panelStars.appendChild(
+        s
+    );
+}
+
+
+/* =========================================================
+   MAGIC CIRCLE
+========================================================= */
+
+const magicCircle =
+    document.getElementById(
+        "magicCircle"
+    );
+
+let magicX =
+    innerWidth/2;
+
+let magicY =
+    innerHeight/2;
+
+let targetMagicX =
+    magicX;
+
+let targetMagicY =
+    magicY;
+
+
+window.addEventListener(
+    "mousemove",
+    e=>{
+
+        targetMagicX =
+            e.clientX;
+
+        targetMagicY =
+            e.clientY;
+
+        magicCircle.style.opacity =
+            "1";
+    },
+    {passive:true}
+);
+
+
+window.addEventListener(
+    "touchmove",
+    e=>{
+
+        if(
+            !e.touches[0]
+        ){
+            return;
+        }
+
+        targetMagicX =
+            e.touches[0].clientX;
+
+        targetMagicY =
+            e.touches[0].clientY;
+
+        magicCircle.style.opacity =
+            "1";
+    },
+    {passive:true}
+);
+
+
+function updateMagicCircle(){
+
+    magicX +=
+        (
+            targetMagicX-
+            magicX
+        )*.28;
+
+    magicY +=
+        (
+            targetMagicY-
+            magicY
+        )*.28;
+
+    magicCircle.style.transform =
+        `translate(${magicX}px,${magicY}px) translate(-50%,-50%)`;
+
+    requestAnimationFrame(
+        updateMagicCircle
+    );
+}
+
+updateMagicCircle();
+
+
+/* =========================================================
+   RUNG MÀN HÌNH
+========================================================= */
+
+function triggerScreenShake(){
+
+    const space =
+        document.getElementById(
+            "space"
+        );
+
+    space.classList.remove(
+        "screen-shake"
+    );
+
+    void space.offsetWidth;
+
+    space.classList.add(
+        "screen-shake"
+    );
+
+    setTimeout(
+        ()=>{
+            space.classList.remove(
+                "screen-shake"
+            );
+        },
+        450
+    );
+}
+
+
+/* =========================================================
+   HIỆU ỨNG NỨT KÍNH
+========================================================= */
+
+const joinButton =
+    document.getElementById(
+        "joinButton"
+    );
+
+
+function glassEffect(e){
+
+    const rect =
+        joinButton.getBoundingClientRect();
+
+
+    let x =
+        rect.width/2;
+
+    let y =
+        rect.height/2;
+
+
+    if(e){
+
+        if(e.clientX){
+
+            x =
+                e.clientX-
+                rect.left;
+
+            y =
+                e.clientY-
+                rect.top;
+
+        }else if(
+            e.touches &&
+            e.touches[0]
+        ){
+
+            x =
+                e.touches[0].clientX-
+                rect.left;
+
+            y =
+                e.touches[0].clientY-
+                rect.top;
+        }
+    }
+
+
+    /* =====================================================
+       TÂM NỨT
+    ===================================================== */
+
+    const crack =
+        document.createElement(
+            "div"
+        );
+
+    crack.className =
+        "glass-crack";
+
+    crack.style.left =
+        x+"px";
+
+    crack.style.top =
+        y+"px";
+
+    joinButton.appendChild(
+        crack
+    );
+
+
+    /* =====================================================
+       ĐƯỜNG NỨT CHÍNH
+    ===================================================== */
+
+    const mainAngles = [
+
+        -178,
+        -155,
+        -132,
+        -108,
+        -82,
+        -55,
+        -28,
+        0,
+        28,
+        56,
+        82,
+        108,
+        136,
+        160
+
+    ];
+
+
+    mainAngles.forEach(
+        angle=>{
+
+            const line =
+                document.createElement(
+                    "div"
+                );
+
+            line.className =
+                "crack-line";
+
+            line.style.transform =
+                `rotate(${angle}deg)`;
+
+            line.style.animationDelay =
+                Math.random()*
+                .08+
+                "s";
+
+
+            crack.appendChild(
+                line
+            );
+
+
+            /* =================================================
+               NHÁNH PHỤ
+            ================================================= */
+
+            const branchCount =
+                Math.random()>.45
+                ? 2
+                : 1;
+
+
+            for(
+                let b=0;
+                b<branchCount;
+                b++
+            ){
+
+                const branch =
+                    document.createElement(
+                        "div"
+                    );
+
+                branch.className =
+                    "crack-branch";
+
+
+                const branchAngle =
+                    angle+
+                    (
+                        Math.random()>.5
+                        ? 20+
+                          Math.random()*30
+                        : -20-
+                          Math.random()*30
+                    );
+
+
+                branch.style.left =
+                    (
+                        45+
+                        Math.random()*75
+                    )+
+                    "px";
+
+
+                branch.style.top =
+                    "0px";
+
+
+                branch.style.transform =
+                    `rotate(${branchAngle}deg)`;
+
+
+                line.appendChild(
+                    branch
+                );
+            }
+        }
+    );
+
+
+    /* =====================================================
+       MẢNH KÍNH
+    ===================================================== */
+
+    for(
+        let i=0;
+        i<28;
+        i++
+    ){
+
+        const piece =
+            document.createElement(
+                "div"
+            );
+
+        piece.className =
+            "glass-piece";
+
+
+        piece.style.left =
+            x+"px";
+
+        piece.style.top =
+            y+"px";
+
+
+        const angle =
+            Math.random()*
+            Math.PI*2;
+
+
+        const distance =
+            40+
+            Math.random()*160;
+
+
+        piece.style.setProperty(
+            "--dx",
+            Math.cos(angle)*
+            distance+
+            "px"
+        );
+
+
+        piece.style.setProperty(
+            "--dy",
+            Math.sin(angle)*
+            distance+
+            "px"
+        );
+
+
+        piece.style.width =
+            3+
+            Math.random()*6+
+            "px";
+
+
+        piece.style.height =
+            5+
+            Math.random()*11+
+            "px";
+
+
+        piece.style.transform =
+            `rotate(${
+                Math.random()*180
+            }deg)`;
+
+
+        joinButton.appendChild(
+            piece
+        );
+
+
+        setTimeout(
+            ()=>{
+                piece.remove();
+            },
+            950
+        );
+    }
+
+
+    /* =====================================================
+       RUNG MÀN HÌNH
+    ===================================================== */
+
+    triggerScreenShake();
+
+
+    setTimeout(
+        ()=>{
+            crack.remove();
+        },
+        950
+    );
+}
+
+
+/* =========================================================
+   CLICK / TOUCH
+========================================================= */
+
+joinButton.addEventListener(
+    "mousedown",
+    glassEffect
+);
+
+joinButton.addEventListener(
+    "touchstart",
+    glassEffect,
+    {passive:true}
+);
+
+</script>
+
+</body>
+</html>
