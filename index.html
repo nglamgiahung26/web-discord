@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doki or Furry - Discord Server</title>
-    <!-- Import Font chữ đẹp -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -17,11 +16,10 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #0b0b12;
+            background-color: #080810;
             font-family: 'Outfit', sans-serif;
         }
 
-        /* Canvas nền rồng bay */
         #dragon-canvas {
             position: fixed;
             top: 0;
@@ -32,7 +30,6 @@
             pointer-events: none;
         }
 
-        /* Khu vực hiển thị trung tâm */
         .container {
             position: relative;
             z-index: 10;
@@ -44,7 +41,6 @@
             padding: 20px;
         }
 
-        /* Khung thẻ chính */
         .card {
             position: relative;
             background: rgba(20, 20, 32, 0.75);
@@ -65,7 +61,6 @@
             50% { transform: translateY(-8px); }
         }
 
-        /* Khung góc trang trí bên trong card */
         .card::before, .card::after {
             content: '';
             position: absolute;
@@ -76,7 +71,6 @@
         .card::before { top: 12px; left: 12px; border-right: none; border-bottom: none; }
         .card::after { bottom: 12px; right: 12px; border-left: none; border-top: none; }
 
-        /* Avatar / Ảnh đại diện phía trên card */
         .avatar-wrapper {
             position: absolute;
             top: -50px;
@@ -98,7 +92,6 @@
             background: #11111b;
         }
 
-        /* Nội dung chữ */
         .content {
             margin-top: 40px;
         }
@@ -120,7 +113,6 @@
             font-weight: 400;
         }
 
-        /* Nút Tham gia Discord */
         .join-btn {
             display: inline-block;
             width: 100%;
@@ -144,11 +136,6 @@
             background: linear-gradient(135deg, #b4befe 0%, #89b4fa 100%);
         }
 
-        .join-btn:active {
-            transform: translateY(1px);
-        }
-
-        /* Hiệu ứng gầm / thông báo trạng thái rồng */
         #roar-alert {
             position: fixed;
             bottom: 20px;
@@ -175,32 +162,25 @@
 </head>
 <body>
 
-    <!-- Canvas vẽ rồng phương đông trắng bay lượn -->
     <canvas id="dragon-canvas"></canvas>
-
-    <!-- Thông báo rồng gầm -->
     <div id="roar-alert">🐲 *Rồng trắng gầm vang trời đất!* 🔥</div>
 
-    <!-- Nội dung bảng chính -->
     <div class="container">
         <div class="card">
             <div class="avatar-wrapper">
-                <!-- Đảm bảo tên file ảnh trùng khớp với file của cậu -->
+                <!-- Đảm bảo tên file ảnh này trùng với file cậu upload lên GitHub nhé -->
                 <img src="Screenshot 2026-10-03 060114.jpg" alt="Avatar">
             </div>
             <div class="content">
                 <h1>Doki or Furry</h1>
                 <p>group Gaming</p>
-                <!-- Link Discord chính thức đã được gán vào đây -->
                 <a href="https://discord.gg/exAPya3pk8" target="_blank" rel="noopener noreferrer" class="join-btn">THAM GIA</a>
             </div>
         </div>
     </div>
 
-    <!-- Script bảo vệ web -->
     <script src="webshield.js"></script>
 
-    <!-- Script tạo hiệu ứng Rồng Trắng Phương Đông uốn lượn và gầm -->
     <script>
         const canvas = document.getElementById('dragon-canvas');
         const ctx = canvas.getContext('2d');
@@ -220,7 +200,8 @@
         });
         window.addEventListener('mouseleave', () => { mouse.active = false; });
 
-        const totalSegments = 45;
+        // Tạo mảng đốt rồng dài và mềm mại hơn
+        const totalSegments = 60;
         let dragonPath = [];
         for (let i = 0; i < totalSegments; i++) {
             dragonPath.push({ x: canvas.width / 2, y: canvas.height / 2 });
@@ -234,14 +215,14 @@
                 targetX = mouse.x;
                 targetY = mouse.y;
             } else {
-                angle += 0.02;
-                targetX = canvas.width / 2 + Math.sin(angle) * (canvas.width * 0.3);
-                targetY = canvas.height / 2 + Math.cos(angle * 1.5) * (canvas.height * 0.25);
+                angle += 0.015;
+                targetX = canvas.width / 2 + Math.sin(angle) * (canvas.width * 0.35);
+                targetY = canvas.height / 2 + Math.cos(angle * 1.3) * (canvas.height * 0.25);
             }
 
             let head = dragonPath[0];
-            head.x += (targetX - head.x) * 0.08;
-            head.y += (targetY - head.y) * 0.08;
+            head.x += (targetX - head.x) * 0.07;
+            head.y += (targetY - head.y) * 0.07;
 
             for (let i = 1; i < totalSegments; i++) {
                 let prev = dragonPath[i - 1];
@@ -249,7 +230,7 @@
                 let dx = prev.x - curr.x;
                 let dy = prev.y - curr.y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
-                let spacing = 12;
+                let spacing = 10;
                 if (dist > spacing) {
                     let angleNode = Math.atan2(dy, dx);
                     curr.x = prev.x - Math.cos(angleNode) * spacing;
@@ -261,21 +242,32 @@
         function drawDragon() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Vẽ thân rồng có dạng vảy ngọc trai uyển chuyển uốn lượn
             for (let i = totalSegments - 1; i >= 0; i--) {
                 let p = dragonPath[i];
-                let size = Math.max(2, (1 - i / totalSegments) * 24);
+                // Đầu rồng to rõ, thân và đuôi thon nhỏ dần
+                let size = i === 0 ? 16 : Math.max(3, (1 - i / totalSegments) * 22);
                 
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
                 
                 let gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
-                gradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-                gradient.addColorStop(0.5, 'rgba(137, 180, 250, 0.6)');
-                gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                if (i === 0) {
+                    // Đầu rồng sáng chói đặc biệt
+                    gradient.addColorStop(0, '#ffffff');
+                    gradient.addColorStop(0.7, '#89b4fa');
+                    gradient.addColorStop(1, 'rgba(137, 180, 250, 0)');
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = '#ffffff';
+                } else {
+                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                    gradient.addColorStop(0.5, 'rgba(137, 180, 250, 0.5)');
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = '#89b4fa';
+                }
                 
                 ctx.fillStyle = gradient;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#89b4fa';
                 ctx.fill();
             }
         }
